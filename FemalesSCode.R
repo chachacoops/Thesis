@@ -17,7 +17,7 @@ setwd("/Users/charlottecooper/shrubs-hub/SparrowsScripts/FemalesS")
 
 
 ###### FEMALES RIGHT SIDE MAZE
-
+#combine datafiles into one
 rrfidfs <- list.files(path="/Users/charlottecooper/Desktop/Masters/Dissertation/Data/RightRFIDFemaleS", full.names = TRUE) %>% 
   lapply(read_csv) %>% 
   bind_rows 
@@ -39,7 +39,7 @@ rrfidfs <- read.csv("/Users/charlottecooper/shrubs-hub/SparrowsScripts/FemalesS/
 names(rrfidfs) <- gsub("\\.", "", names(rrfidfs)) #remove full stops from column names
 rrfidfs$Location <- "Right"
 
-#adding in the condensed letters for each bird
+#adding in the letters for each bird
 rrfidfs %>% group_by(Transpondercode) %>%
   summarise(count=length(Transpondercode)) %>% print(n=40)
 
@@ -103,6 +103,8 @@ gsize(inetwork.ox.fsR)
 
 ##### FEMALES LEFT SIDE MAZE #####
 
+#combine datasets
+
 lrfidfs <- list.files(path="/Users/charlottecooper/Desktop/Masters/Dissertation/Data/LeftRFIDFemalesS", full.names = TRUE) %>% 
   lapply(read_csv) %>% 
   bind_rows 
@@ -124,7 +126,7 @@ View(lrfidfs)
 
 lrfidfs %>% group_by(Transpondercode) %>%
   summarise(count=length(Transpondercode))
-
+#assign letters to birds
 
 lrfidfs <- mutate(lrfidfs, Letter = case_when(
   (Transpondercode == "0007838EE2") ~ "A",
@@ -150,7 +152,7 @@ lrfidfs <- mutate(lrfidfs, Letter = case_when(
 ))
 
 View(lrfidfs)
-
+#take subset
 lrfidfs <- select(lrfidfs, Date, RoundTime, Transpondercode, Location, Letter)
 lrfidfs <- lrfidfs[!duplicated(lrfidfs),]
 nrow(lrfidfs)
@@ -183,5 +185,5 @@ write.csv(inetwork.metrics.fsL, file = "/Users/charlottecooper/shrubs-hub/Sparro
 
 save(assocFemaleLeftMaze, file = "assocFemaleLeftMaze.RData")
 load("/Users/charlottecooper/shrubs-hub/SparrowsScripts/FemalesS/assocFemaleLeftMaze.RData")
-
+#network size
 gsize(inetwork.ox.fsL)
