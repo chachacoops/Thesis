@@ -19,7 +19,7 @@ setwd("/Users/charlottecooper/shrubs-hub/SparrowsScripts/MalesSSep")
 
 
 ###### MALES RIGHT SIDE MAZE
-
+#combine files
 rrfidms <- list.files(path="/Users/charlottecooper/Desktop/Masters/Dissertation/Data/RightRFIDMaless", full.names = TRUE) %>% 
   lapply(read_csv) %>% 
   bind_rows 
@@ -107,27 +107,6 @@ load("/Users/charlottecooper/shrubs-hub/SparrowsScripts/MalesSSep/assocMaleRight
 
 mean_distance(inetwork.ox.msR) # = 1 completely linked
 
-graph.ox.Males.SR <- ggraph(inetwork.ox.msR, 'stress') +
-  geom_edge_link(aes(alpha = weight)) +
-  geom_node_point(size = 7, shape=21, fill="black", colour="black") + 
-  geom_node_text(aes(label = name, color = "white")) +
-  ggtitle("Males Maze Right feeder")+
-  theme_graph()+
-  theme(legend.position = "none")
-graph.ox.Males.SR
-
-?save()
-ggarrange(graph.ox.Males.SL, graph.ox.Males.SR, graph.ox.Males.OL, graph.ox.Males.OR + rremove("x.text"),
-          ncol = 2, nrow = 2)
-?geom_node_text
-
-graph.ox.Males.SR
-par(mfrow=c(2,2))
-graph.ox.Males.SL
-graph.ox.Males.SR
-graph.ox.Males.OL
-graph.ox.Males.OR
-
 unique(rrfidms$Date)
 
 ##### MALES LEFT SIDE MAZE #####
@@ -195,13 +174,4 @@ setwd("/Users/charlottecooper/shrubs-hub/SparrowsScripts/MalesSSep")
 load("assocMaleLeftMaze.RData")
 
 mean_distance(inetwork.ox.msL)
-
-graph.ox.Males.SL  <- ggraph(inetwork.ox.msL, 'stress') +
-  geom_edge_link(aes(alpha = weight)) +
-  geom_node_point(size = 7, shape=21, fill="black", colour="black") + 
-  geom_node_text(aes(label = name, colour = "white")) +
-  ggtitle("Males Maze Left feeder")+
-  theme_graph()+
-  theme(legend.position = "none")
-graph.ox.Males.SL
 
