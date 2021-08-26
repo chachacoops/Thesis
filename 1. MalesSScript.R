@@ -12,10 +12,14 @@ require(chron)
 
 rm(list=ls()) 
 
+#download data
+url <- "https://github.com/chachacoops/Thesis/archive/refs/heads/main.zip"
+destfile <- "C:/Users/...YourWorkingDirectory"
+
+download.file(url, destfile)
 
 ###### SEPARATE NETWORKS MALES MAZE
 getwd()
-setwd("/Users/charlottecooper/shrubs-hub/SparrowsScripts/MalesSSep")
 
 
 ###### MALES RIGHT SIDE MAZE
