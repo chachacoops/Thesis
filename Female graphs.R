@@ -1,5 +1,7 @@
 
-require(lme4)
+require(ggplot)
+require(MCMCglmm)
+#maze left graph
 graph.ox.Females.SL  <- ggraph(inetwork.ox.fsL, 'stress') +
   geom_edge_link(aes(alpha = weight)) +
   geom_node_point(size = 7, shape=21, fill="black", colour="black") + 
@@ -7,7 +9,7 @@ graph.ox.Females.SL  <- ggraph(inetwork.ox.fsL, 'stress') +
   ggtitle("Females Maze Left feeder")+
   theme(legend.position = "none", plot.title = element_text(size=15))
 graph.ox.Females.SL
-
+#maze right graph
 graph.ox.Females.SR <- ggraph(inetwork.ox.fsR, 'stress') +
   geom_edge_link(aes(alpha = weight)) +
   geom_node_point(size = 7, shape=21, fill="black", colour="black") + 
@@ -15,7 +17,7 @@ graph.ox.Females.SR <- ggraph(inetwork.ox.fsR, 'stress') +
   ggtitle("Females Maze Right feeder")+
   theme(legend.position = "none", plot.title = element_text(size=15))
 graph.ox.Females.SR 
-
+#open right graph
 graph.ox.Females.OR <- ggraph(inetwork.ox.foR, 'stress') +
   geom_edge_link(aes(alpha = weight)) +
   geom_node_point(size = 7, shape=21, fill="black", colour="black") + 
@@ -25,25 +27,18 @@ graph.ox.Females.OR <- ggraph(inetwork.ox.foR, 'stress') +
 graph.ox.Females.OR
 
 
-
+#combine graphs & have to make females left manually
 FemaleGraphs <- ggarrange(graph.ox.Females.SL, graph.ox.Females.SR, graph.ox.Females.OR + rremove("x.text"),
           ncol = 2, nrow = 2)
 FemaleGraphs
 
 ##### female repeatability
 
-setwd("/Users/charlottecooper/shrubs-hub/SparrowsScripts/FemalesRep")
 
 FemalesRep <- list.files(path="/Users/charlottecooper/shrubs-hub/SparrowsScripts/FemalesRep", full.names = TRUE) %>% 
   lapply(read_csv) %>% 
   bind_rows
 
-FemalesRep %>% group_by(Letter) %>%
-  summarise(count=length(Letter))
-
-FemalesRep <- FemalesRep[-c(21),]
-
-FeRep <- lmer(strength ~1+(1|Letter), data=FemalesRep)
 
 ##### Females t-test
 
@@ -66,12 +61,25 @@ FemalesOL <- data.frame(Letter, degree, strength, betweenness)
 View(FemalesOL)
 View(FemalesML)
 
+
+#combining left and right feeder metrics
 FemalesOpen <- rbind(FemalesOL, FemalesOR)
 FemalesOpen$Type <- "Open"
 FemalesMaze <- rbind(FemalesML, FemalesMR)
 FemalesMaze$Type <- "Maze"
 
 FemalesR <- rbind(FemalesOpen, FemalesMaze)
+
+
+
+
+mcmcFemales <- MCMCglmm(Strength~1, random=~ID, data=FemalesR, nitt=100000, burnin=50000)
+autocorr(mcmcFemales$VCV)
+R2 <- mcmcFemales$VCV[,"ID"]/(mcmcFemales$VCV[,"ID"]+mcmcFemales$VCV[,"units"])
+posterior.mode(R2)
+HPDinterval(R2)
+
+
 hist(FemalesR$betweenness)
 
 wilcox.test(FemalesMaze$strength, FemalesOpen$strength)
