@@ -72,7 +72,7 @@ FemalesR <- rbind(FemalesOpen, FemalesMaze)
 
 
 
-
+#calculate repeatability
 mcmcFemales <- MCMCglmm(Strength~1, random=~ID, data=FemalesR, nitt=100000, burnin=50000)
 autocorr(mcmcFemales$VCV)
 R2 <- mcmcFemales$VCV[,"ID"]/(mcmcFemales$VCV[,"ID"]+mcmcFemales$VCV[,"units"])
