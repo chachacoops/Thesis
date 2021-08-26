@@ -1,8 +1,9 @@
 install.packages("plotrix")
 library(plotrix)
+library(MCMCglmm)
 ##### Male graphs
 
-#Maze right
+#Maze right network plot
 
 graph.ox.Males.SR <- ggraph(inetwork.ox.msR, 'stress') +
   geom_edge_link(aes(alpha = weight)) +
@@ -13,7 +14,7 @@ graph.ox.Males.SR <- ggraph(inetwork.ox.msR, 'stress') +
 graph.ox.Males.SR
 
 
-#Maze left
+#Maze left network plot
 
 graph.ox.Males.SL  <- ggraph(inetwork.ox.msL, 'stress') +
   geom_edge_link(aes(alpha = weight)) +
@@ -24,7 +25,7 @@ graph.ox.Males.SL  <- ggraph(inetwork.ox.msL, 'stress') +
 graph.ox.Males.SL
 
 
-#Open right
+#Open right network plot
 
 graph.ox.Males.OR <- ggraph(inetwork.ox.moR, 'stress') +
   geom_edge_link(aes(alpha=weight)) +
@@ -34,7 +35,7 @@ graph.ox.Males.OR <- ggraph(inetwork.ox.moR, 'stress') +
   theme(legend.position = "none", plot.title = element_text(size=15))
 graph.ox.Males.OR
 
-#Open left
+#Open left network plot
 
 graph.ox.Males.OL <- ggraph(inetwork.ox.moL, 'stress') +
   geom_edge_link(aes(alpha = weight)) +
@@ -44,21 +45,16 @@ graph.ox.Males.OL <- ggraph(inetwork.ox.moL, 'stress') +
   theme(legend.position = "none", plot.title = element_text(size=15))
 graph.ox.Males.OL
 
-?ggtitle
-
-?geom_node_text
-#combine
+#combine into one plot
 MaleGraphs <- ggarrange(graph.ox.Males.SL, graph.ox.Males.SR, graph.ox.Males.OL, graph.ox.Males.OR + rremove("x.text"),
           ncol = 2, nrow = 2)
 
 
 ##### male repeatability
-install.packages("lme4")
-require(lme4)
 
-setwd("/Users/charlottecooper/shrubs-hub/SparrowsScripts/MalesRep")
-MalesSNetwork <- read.csv("MalesSNetwork.csv")
 
+
+#load in data
 MalesRep <- list.files(path="/Users/charlottecooper/shrubs-hub/SparrowsScripts/MalesRep", full.names = TRUE) %>% 
   lapply(read_csv) %>% 
   bind_rows
@@ -94,25 +90,13 @@ MalesR <- rbind(MalesMaze, MalesOpen)
 
 write.csv(MalesR, file = "/Users/charlottecooper/shrubs-hub/SparrowsScripts/MalesRep/MalesR.csv", row.names = FALSE)
 
+#calculate repeatability of strength
 
-library(lme4)
-mM <- lmer(strength ~1+(1|Letter), data=MalesR)
-summary(mM)
-
-
-ggplot(MalesR,aes(x=Letter,y=strength,col=Type)) +
-  geom_boxplot()+
-  theme(text = element_text(size=15),)+
-  labs(x = "\nBird ID", y = "Interaction stength\n", colour = "Setup", title = "Strength - Male networks")+
-  theme(strip.text=element_text(size=15))+
-  theme(plot.margin=unit(c(0.5,0.5,0.75,0.6), "cm"))
-  
-ggplot(MalesR,aes(x=Letter,y=degree,col=Type)) +
-  geom_boxplot()+
-  theme(text = element_text(size=15),)+
-  labs(x = "\nBird ID", y = "Degree\n", colour = "Setup", title = "Degree - Male networks")+
-  theme(strip.text=element_text(size=15))+
-  theme(plot.margin=unit(c(0.5,0.5,0.75,0.6), "cm"))
+mcmcMales <- MCMCglmm(Strength~1, random=~ID, data=MalesR, nitt=100000, burnin=50000)
+autocorr(mcmcMales$VCV)
+R1 <- mcmcMales$VCV[,"ID"]/(mcmcMales$VCV[,"ID"]+mcmcMales$VCV[,"units"])
+posterior.mode(R1)
+HPDinterval(R1)
 
 
 #Male maze descriptives
@@ -236,27 +220,3 @@ wilcox.test(MalesML$betweenness, MalesOL$betweenness, exact = F)
 
 
 
-#SIR Males Maze
-
-
-males_isv <- c(S=20, I=1, R=0)
-parameters <- c(gamma=0.2, beta=0.2)
-time<-seq(from=1,to=100,by=1)
-sir_model <- function(time,state,parameters){
-  with(as.list(c(state,parameters)),{
-    N=S+I+R
-    lambda=beta*(I/N)
-    dS=-lambda*S
-    dI=lambda*S-gamma*I
-    dR=gamma*I
-    
-    return(list(c(dS,dI,dR)))
-  })
-}
-
-output <- as.data.frame(ode(y=males_isv, func=sir_model, parms=parameters,times=time))
-out_long<- melt(output, id="time")
-
-ggplot(data = out_long,
-       aes(x = time, y = value/20, colour = variable, group = variable)) + 
-  geom_line()+xlab("Time (days)")+ylab("Proportion of population")+scale_color_discrete(name="State")
