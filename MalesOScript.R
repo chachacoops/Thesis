@@ -4,7 +4,7 @@ setwd("/Users/charlottecooper/shrubs-hub/SparrowsScripts/MalesOSep")
 
 
 ##### MALES RIGHT SIDE OPEN
-
+#combine datafiles
 rrfidmo <- list.files(path="/Users/charlottecooper/Desktop/Masters/Dissertation/Data/RightRFIDMalesO", full.names = TRUE) %>% 
   lapply(read_csv) %>% 
   bind_rows 
@@ -18,14 +18,15 @@ write.csv(rrfidmo, "/Users/charlottecooper/shrubs-hub/SparrowsScripts/MalesO/com
 
 rrfidmo <- read.csv("/Users/charlottecooper/shrubs-hub/SparrowsScripts/MalesO/combinedRRFIDmo.csv")
 names(rrfidmo) <- gsub("\\.", "", names(rrfidmo)) #remove full stops from column names
-
+#remove any ghost reads
 View(rrfidmo)
 unique(rrfidmo$Transpondercode)
 rrfidmo <- rrfidmo[-c(8381), ]
 rrfidmo$Location <- "Right"
-
+#count number of records per bird
 rrfidmo %>% group_by(Transpondercode) %>%
   summarise(count=length(Transpondercode))
+#assign letters
 
 rrfidmo <- mutate(rrfidmo, Letter = case_when(
   (Transpondercode == "000783A8B7") ~ "A",
@@ -88,7 +89,7 @@ gsize(inetwork.ox.moR)
 
 
 ##### MALES LEFT SIDE OPEN #####
-
+#combine files
 lrfidmo <- list.files(path="/Users/charlottecooper/Desktop/Masters/Dissertation/Data/LeftRFIDMalesO", full.names = TRUE) %>% 
   lapply(read_csv) %>% 
   bind_rows 
@@ -102,10 +103,10 @@ write.csv(lrfidmo, "/Users/charlottecooper/shrubs-hub/SparrowsScripts/MalesO/com
 lrfidmo <- read.csv("/Users/charlottecooper/shrubs-hub/SparrowsScripts/MalesO/combinedLRFIDmo.csv")
 names(lrfidmo) <- gsub("\\.", "", names(lrfidmo)) #remove full stops from column names
 lrfidmo$Location <- "Left"
-
+#count events
 lrfidmo %>% group_by(Transpondercode) %>%
   summarise(count=length(Transpondercode))
-
+#assign letters
 lrfidmo <- mutate(lrfidmo, Letter = case_when(
   (Transpondercode == "000783A8B7") ~ "A",
   (Transpondercode== "000783A3D1") ~ "B",
