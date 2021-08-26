@@ -18,6 +18,8 @@ setwd("/Users/charlottecooper/shrubs-hub/SparrowsScripts/FemalesO")
 
 ###### FEMALES RIGHT SIDE MAZE
 
+#combine data files into one data file
+
 rrfidfo <- list.files(path="/Users/charlottecooper/Desktop/Masters/Dissertation/Data/RightRFIDFemalesO", full.names = TRUE) %>% 
   lapply(read_csv) %>% 
   bind_rows 
@@ -43,7 +45,7 @@ rrfidfo$Location <- "Right"
 rrfidfo %>% group_by(Transpondercode) %>%
   summarise(count=length(Transpondercode)) %>% print(n=40)
 
-
+#assign letters for each transponder
 
 rrfidfo <- mutate(rrfidfo, Letter = case_when(
   (Transpondercode == "0007838EE2") ~ "A",
@@ -106,11 +108,12 @@ getwd()
 save(assocFemaleRightOpen, file = "assocFemaleRightOpen.RData")
 load("/Users/charlottecooper/shrubs-hub/SparrowsScripts/FemalesO/assocFemaleRightOpen.RData")
 
-
+#check network size
 gsize(inetwork.ox.foR)
 summary(subset.ox.foR)
 
 ##### Females LEFT SIDE MAZE #####
+#combine data files into one data file
 
 lrfidfo <- list.files(path="/Users/charlottecooper/Desktop/Masters/Dissertation/Data/LeftRFIDFemalesO", full.names = TRUE) %>% 
   lapply(read_csv) %>% 
@@ -131,11 +134,12 @@ lrfidfo<- read.csv("/Users/charlottecooper/shrubs-hub/SparrowsScripts/FemalesO/c
 lrfidfo$Location <- "Left"
 View(lrfidfo)
 
+#check the number of reads for each code
 lrfidfo %>% group_by(Transpondercode) %>%
   summarise(count=length(Transpondercode))
 
 unique(lrfidfo$Transpondercode)
-
+#assign letters
 lrfidfo <- mutate(lrfidfo, Letter = case_when(
   (Transpondercode == "0007838EE2") ~ "A",
   (Transpondercode== "00078394D9") ~ "B",
@@ -160,7 +164,7 @@ lrfidfo <- mutate(lrfidfo, Letter = case_when(
 ))
 
 View(lrfidfo)
-
+#take subset and remove duplications
 lrfidfo <- select(lrfidfo, Date, Time, Transpondercode, Location, Letter)
 lrfidfo <- lrfidfo[!duplicated(lrfidfo),]
 nrow(lrfidfo)
@@ -200,12 +204,3 @@ inetwork.metrics.foL <- nodesfoL %>% mutate(degree = degree(inetwork.ox.foL, v =
                                             betweenness = betweenness(inetwork.ox.foL, v = Letter, directed = TRUE, nobigint = FALSE))
 write.csv(inetwork.metrics.foL, file = "/Users/charlottecooper/shrubs-hub/SparrowsScripts/FemalesO/FemalesLeftMaze.csv", row.names = FALSE)
 
-
-graph.ox.Females.OL <- ggraph(inetwork.ox.foL, 'stress') +
-  geom_edge_link(aes(alpha = weight)) +
-  geom_node_point(size = 7, shape=21, fill="black", colour="black") + 
-  geom_node_text(aes(label = name, color = "white")) +
-  ggtitle("Females Open Right feeder")+
-  theme_graph()+
-  theme(legend.position = "none")
-graph.ox.Females.OL
